@@ -1,5 +1,7 @@
 package patmat
 
+import java.security.InvalidParameterException
+
 import common._
 
 /**
@@ -146,7 +148,10 @@ object Huffman {
     * The parameter `chars` is an arbitrary text. This function extracts the character
     * frequencies from that text and creates a code tree based on them.
     */
-  def createCodeTree(chars: List[Char]): CodeTree = ???
+  def createCodeTree(chars: List[Char]): CodeTree = {
+    val leaves = makeOrderedLeafList(times(chars))
+    until(singleton, combine)(leaves)
+  }
 
 
   // Part 3: Decoding
@@ -157,7 +162,22 @@ object Huffman {
     * This function decodes the bit sequence `bits` using the code tree `tree` and returns
     * the resulting list of characters.
     */
-  def decode(tree: CodeTree, bits: List[Bit]): List[Char] = ???
+  def decode(tree: CodeTree, bits: List[Bit]): List[Char] = {
+
+    def buildCharList(subTree: CodeTree, bitsList: List[Bit], decodedString: List[Char]): List[Char] = subTree match {
+      case Leaf(char, weight) => decodedString match {
+        case Nil => List(char)
+        case _ => decodedString ::: List(char)
+      }
+      case Fork(leftSubTree, rightSubTree, charList, forkWeight) => bitsList match {
+        case 0 :: xs => buildCharList(leftSubTree, xs, decodedString)
+        case 1 :: xs => buildCharList(rightSubTree, xs, decodedString)
+        case _ => throw new InvalidParameterException("Something weird happened")
+      }
+    }
+
+    buildCharList(tree, bits, Nil)
+  }
 
   /**
     * A Huffman coding tree for the French language.
@@ -168,14 +188,14 @@ object Huffman {
 
   /**
     * What does the secret message say? Can you decode it?
-    * For the decoding use the `frenchCode' Huffman tree defined above.
+    * For the decoding use the 'frenchCode' Huffman tree defined above.
     */
-  val secret: List[Bit] = List(0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1)
+  val secret: List[Bit] = List(0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1,  1,0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1)
 
   /**
     * Write a function that returns the decoded secret
     */
-  def decodedSecret: List[Char] = ???
+  def decodedSecret: List[Char] = decode(frenchCode, secret)
 
 
   // Part 4a: Encoding using Huffman tree
