@@ -163,16 +163,13 @@ object Huffman {
     * the resulting list of characters.
     */
   def decode(tree: CodeTree, bits: List[Bit]): List[Char] = {
-    println(bits.toString());
     def buildCharList(subTree: CodeTree, bitsList: List[Bit], decodedString: List[Char]): List[Char] = bitsList match {
-      case Nil => decodedString
+      case Nil => subTree match {
+        case Leaf (char, weight) => decodedString :+ char
+        case Fork (l,r,c,w) => throw new InvalidParameterException("bit string ended in a fork")
+      }
       case b :: bs => subTree match {
-        case Leaf (char, weight) => {
-          println(char);
-          println(bitsList.toString());
-          println(bs.toString());
-          char :: buildCharList(tree, bitsList, decodedString)
-        }
+        case Leaf (char, weight) =>  buildCharList(tree, bitsList, decodedString :+ char)
         case Fork (leftTree, rightTree, charList, forkWeight) => b match {
           case 0 => buildCharList(leftTree, bs, decodedString)
           case 1 => buildCharList(rightTree, bs, decodedString)

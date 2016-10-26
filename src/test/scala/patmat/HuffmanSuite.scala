@@ -52,7 +52,7 @@ class HuffmanSuite extends FunSuite {
 
   test("decode the secrete") {
     new TestTrees {
-      val secretString = decodedSecret;
+      val secretString = decodedSecret
       assert(true == true);
     }
   }
