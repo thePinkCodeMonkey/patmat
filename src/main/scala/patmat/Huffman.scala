@@ -20,11 +20,17 @@ object Huffman {
     * present in the leaves below it. The weight of a `Fork` node is the sum of the weights of these
     * leaves.
     */
-  abstract class CodeTree
+  abstract class CodeTree {
+    def contains(ch: Char): Boolean
+  }
 
-  case class Fork(left: CodeTree, right: CodeTree, chars: List[Char], weight: Int) extends CodeTree
+  case class Fork(left: CodeTree, right: CodeTree, chars: List[Char], weight: Int) extends CodeTree {
+    def contains(ch: Char): Boolean = chars.contains(ch)
+  }
 
-  case class Leaf(char: Char, weight: Int) extends CodeTree
+  case class Leaf(char: Char, weight: Int) extends CodeTree {
+    def contains(ch: Char): Boolean = char == ch
+  }
 
 
   // Part 1: Basics
@@ -165,12 +171,12 @@ object Huffman {
   def decode(tree: CodeTree, bits: List[Bit]): List[Char] = {
     def buildCharList(subTree: CodeTree, bitsList: List[Bit], decodedString: List[Char]): List[Char] = bitsList match {
       case Nil => subTree match {
-        case Leaf (char, weight) => decodedString :+ char
-        case Fork (l,r,c,w) => throw new InvalidParameterException("bit string ended in a fork")
+        case Leaf(char, weight) => decodedString :+ char
+        case Fork(l, r, c, w) => throw new InvalidParameterException("bit string ended in a fork")
       }
       case b :: bs => subTree match {
-        case Leaf (char, weight) =>  buildCharList(tree, bitsList, decodedString :+ char)
-        case Fork (leftTree, rightTree, charList, forkWeight) => b match {
+        case Leaf(char, weight) => buildCharList(tree, bitsList, decodedString :+ char)
+        case Fork(leftTree, rightTree, charList, forkWeight) => b match {
           case 0 => buildCharList(leftTree, bs, decodedString)
           case 1 => buildCharList(rightTree, bs, decodedString)
           case _ => throw new InvalidParameterException("encoded bits contained an invalid bit")
@@ -192,7 +198,7 @@ object Huffman {
     * What does the secret message say? Can you decode it?
     * For the decoding use the 'frenchCode' Huffman tree defined above.
     */
-  val secret: List[Bit] = List(0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1,  1,0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1)
+  val secret: List[Bit] = List(0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1)
 
   /**
     * Write a function that returns the decoded secret
@@ -206,7 +212,27 @@ object Huffman {
     * This function encodes `text` using the code tree `tree`
     * into a sequence of bits.
     */
-  def encode(tree: CodeTree)(text: List[Char]): List[Bit] = ???
+  def encode(tree: CodeTree)(text: List[Char]): List[Bit] = {
+    def buildEncodeList(subTree: CodeTree, remainderText: List[Char], encodedList: List[Bit]): List[Bit] = {
+      if (remainderText.isEmpty) return encodedList
+      else {
+        //TODO: look at the beginning of the encodedList
+        //TODO: if current tree is leaf, start at the beginning of the tree with the remaining characters
+        //TODO: else is char in the left tree, then append 1 to encodedList and continue to walk the left tree
+        //TODO: if char is the right tree then append 0 to the encodedList and continue to walk the right tree
+
+        subTree match {
+          case Leaf(char, weight) => buildEncodeList(tree, remainderText.tail, encodedList)
+          case Fork(leftTree, rightTree, charList, forkWeight) => {
+            if (leftTree.contains(remainderText.head)) {
+              return buildEncodeList(leftTree, remainderText, encodedList :+ 1)
+            }
+            else return buildEncodeList(rightTree, remainderText, encodedList :+ 0)
+          }
+        }
+      }
+    }
+  }
 
   // Part 4b: Encoding using code table
 
