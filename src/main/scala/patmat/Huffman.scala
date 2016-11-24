@@ -214,24 +214,22 @@ object Huffman {
     */
   def encode(tree: CodeTree)(text: List[Char]): List[Bit] = {
     def buildEncodeList(subTree: CodeTree, remainderText: List[Char], encodedList: List[Bit]): List[Bit] = {
-      if (remainderText.isEmpty) return encodedList
-      else {
-        //TODO: look at the beginning of the encodedList
-        //TODO: if current tree is leaf, start at the beginning of the tree with the remaining characters
-        //TODO: else is char in the left tree, then append 1 to encodedList and continue to walk the left tree
-        //TODO: if char is the right tree then append 0 to the encodedList and continue to walk the right tree
-
-        subTree match {
-          case Leaf(char, weight) => buildEncodeList(tree, remainderText.tail, encodedList)
-          case Fork(leftTree, rightTree, charList, forkWeight) => {
-            if (leftTree.contains(remainderText.head)) {
-              return buildEncodeList(leftTree, remainderText, encodedList :+ 1)
+      remainderText match {
+        case Nil => return encodedList
+        case firstChar::cs => {
+          subTree match {
+            case Leaf(char, weight) => buildEncodeList(tree, remainderText.tail, encodedList)
+            case Fork(leftTree, rightTree, charList, forkWeight) => {
+              if (leftTree.contains(firstChar)) {
+                return buildEncodeList(leftTree, remainderText, encodedList :+ 0)
+              }
+              else return buildEncodeList(rightTree, remainderText, encodedList :+ 1)
             }
-            else return buildEncodeList(rightTree, remainderText, encodedList :+ 0)
           }
         }
       }
     }
+    buildEncodeList(tree, text, List())
   }
 
   // Part 4b: Encoding using code table
