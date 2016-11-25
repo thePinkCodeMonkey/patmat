@@ -216,15 +216,13 @@ object Huffman {
     def buildEncodeList(subTree: CodeTree, remainderText: List[Char], encodedList: List[Bit]): List[Bit] = {
       remainderText match {
         case Nil => return encodedList
-        case firstChar::cs => {
-          subTree match {
-            case Leaf(char, weight) => buildEncodeList(tree, remainderText.tail, encodedList)
-            case Fork(leftTree, rightTree, charList, forkWeight) => {
-              if (leftTree.contains(firstChar)) {
-                return buildEncodeList(leftTree, remainderText, encodedList :+ 0)
-              }
-              else return buildEncodeList(rightTree, remainderText, encodedList :+ 1)
+        case firstChar :: cs => subTree match {
+          case Leaf(char, weight) => buildEncodeList(tree, cs, encodedList)
+          case Fork(leftTree, rightTree, charList, forkWeight) => {
+            if (leftTree.contains(firstChar)) {
+              return buildEncodeList(leftTree, remainderText, encodedList :+ 0)
             }
+            else return buildEncodeList(rightTree, remainderText, encodedList :+ 1)
           }
         }
       }
