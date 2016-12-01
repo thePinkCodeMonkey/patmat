@@ -56,4 +56,9 @@ class HuffmanSuite extends FunSuite {
       assert(true == true);
     }
   }
+
+  test("find code sequence with codeBits") {
+    val codeTable = List(('a', List(0)), ('b', List(1)));
+    assert(codeBits(codeTable)('b') === List(1));
+  }
 }

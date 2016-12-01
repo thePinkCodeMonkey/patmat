@@ -238,7 +238,13 @@ object Huffman {
     * This function returns the bit sequence that represents the character `char` in
     * the code table `table`.
     */
-  def codeBits(table: CodeTable)(char: Char): List[Bit] = ???
+  def codeBits(table: CodeTable)(char: Char): List[Bit] = {
+    val foundPair = table.find((needle:(Char, List[Bit])) => needle._1 == char)
+    foundPair match {
+      case Some(foundPair) => return foundPair._2
+      case None => throw new NoSuchElementException
+    }
+  }
 
   /**
     * Given a code tree, create a code table which contains, for every character in the
@@ -249,6 +255,17 @@ object Huffman {
     * sub-trees, think of how to build the code table for the entire tree.
     */
   def convert(tree: CodeTree): CodeTable = ???
+
+  /**
+    * The weight of the leaf indicates how frequently the char is encountered.
+    * So ideally, we want to sort the list according to the weight.
+    *
+    * Approach 1: we create a list with the bits and the weight, then we map the weighted list
+    * to an unweighted one
+    * Approach 2: be super fancy and try to create the list without creating an additional
+    * tree
+    *
+    */
 
   /**
     * This function takes two code tables and merges them into one. Depending on how you
