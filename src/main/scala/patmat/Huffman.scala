@@ -89,6 +89,7 @@ object Huffman {
       case Nil => acc
       case x :: xs => total(xs.filter(char => char != x), (x, chars.count(char => char == x)) :: acc)
     }
+
     total(chars, List())
   }
 
@@ -227,6 +228,7 @@ object Huffman {
         }
       }
     }
+
     buildEncodeList(tree, text, List())
   }
 
@@ -239,7 +241,7 @@ object Huffman {
     * the code table `table`.
     */
   def codeBits(table: CodeTable)(char: Char): List[Bit] = {
-    val foundPair = table.find((needle:(Char, List[Bit])) => needle._1 == char)
+    val foundPair = table.find((needle: (Char, List[Bit])) => needle._1 == char)
     foundPair match {
       case Some(foundPair) => return foundPair._2
       case None => throw new NoSuchElementException
@@ -254,25 +256,28 @@ object Huffman {
     * a valid code tree that can be represented as a code table. Using the code tables of the
     * sub-trees, think of how to build the code table for the entire tree.
     */
-  def convert(tree: CodeTree): CodeTable = ???
+  def convert(tree: CodeTree): CodeTable = {
+    def buildCodeTable(subTree: CodeTree, codeBits: List[Bit]): CodeTable = {
+      subTree match {
+        case Leaf(char, weight) => List((char, codeBits))
+        case Fork(leftSubtree, rightSubtree, chars, weight) => {
+          mergeCodeTables(buildCodeTable(leftSubtree, codeBits :+ 0), buildCodeTable(rightSubtree, codeBits :+ 1))
+        }
+      }
+    }
 
-  /**
-    * The weight of the leaf indicates how frequently the char is encountered.
-    * So ideally, we want to sort the list according to the weight.
-    *
-    * Approach 1: we create a list with the bits and the weight, then we map the weighted list
-    * to an unweighted one
-    * Approach 2: be super fancy and try to create the list without creating an additional
-    * tree
-    *
-    */
+    buildCodeTable(tree, List())
+  }
 
   /**
     * This function takes two code tables and merges them into one. Depending on how you
     * use it in the `convert` method above, this merge method might also do some transformations
     * on the two parameter code tables.
     */
-  def mergeCodeTables(a: CodeTable, b: CodeTable): CodeTable = ???
+  def mergeCodeTables(a: CodeTable, b: CodeTable): CodeTable = {
+    //TODO We should sort the codeTable such that the ones with short bits are in the front
+    a ++ b
+  }
 
   /**
     * This function encodes `text` according to the code tree `tree`.
@@ -280,5 +285,16 @@ object Huffman {
     * To speed up the encoding process, it first converts the code tree to a code table
     * and then uses it to perform the actual encoding.
     */
-  def quickEncode(tree: CodeTree)(text: List[Char]): List[Bit] = ???
+  def quickEncode(tree: CodeTree)(text: List[Char]): List[Bit] = {
+    val codeTable = convert(tree);
+
+    def encodeText(table: CodeTable, textToEncode: List[Char], encodedBits: List[Bit]): List[Bit] = {
+      textToEncode match {
+        case c :: cs => encodeText(table, cs, encodedBits:::codeBits(table)(c))
+        case Nil => encodedBits
+      }
+    }
+
+    encodeText(codeTable, text, List())
+  }
 }

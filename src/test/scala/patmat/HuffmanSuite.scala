@@ -53,12 +53,27 @@ class HuffmanSuite extends FunSuite {
   test("decode the secrete") {
     new TestTrees {
       val secretString = decodedSecret
-      assert(true == true);
+      assert(true == true)
     }
   }
 
   test("find code sequence with codeBits") {
-    val codeTable = List(('a', List(0)), ('b', List(1)));
-    assert(codeBits(codeTable)('b') === List(1));
+    val codeTable = List(('a', List(0)), ('b', List(1)))
+    assert(codeBits(codeTable)('b') === List(1))
+  }
+
+  test("create code table from code tree") {
+    new TestTrees {
+      val codeTree = convert(t2)
+      assert(codeTree === List(('a', List(0,0)), ('b', List(0,1)), ('d', List(1))))
+    }
+  }
+
+  test("test quick encode") {
+    new TestTrees {
+      var encodedBits= quickEncode(t2)("bad".toList)
+      assert(encodedBits === List(0,1,0,0,1))
+      assert(decode(t2, encodedBits) === "bad".toList)
+    }
   }
 }
