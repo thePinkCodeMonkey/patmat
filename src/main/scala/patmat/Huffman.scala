@@ -216,14 +216,16 @@ object Huffman {
   def encode(tree: CodeTree)(text: List[Char]): List[Bit] = {
     def buildEncodeList(subTree: CodeTree, remainderText: List[Char], encodedList: List[Bit]): List[Bit] = {
       remainderText match {
-        case Nil => return encodedList
+        case Nil => encodedList
         case firstChar :: cs => subTree match {
           case Leaf(char, weight) => buildEncodeList(tree, cs, encodedList)
           case Fork(leftTree, rightTree, charList, forkWeight) => {
             if (leftTree.contains(firstChar)) {
-              return buildEncodeList(leftTree, remainderText, encodedList :+ 0)
+              buildEncodeList(leftTree, remainderText, encodedList :+ 0)
             }
-            else return buildEncodeList(rightTree, remainderText, encodedList :+ 1)
+            else {
+              buildEncodeList(rightTree, remainderText, encodedList :+ 1)
+            }
           }
         }
       }
@@ -243,7 +245,7 @@ object Huffman {
   def codeBits(table: CodeTable)(char: Char): List[Bit] = {
     val foundPair = table.find((needle: (Char, List[Bit])) => needle._1 == char)
     foundPair match {
-      case Some(foundPair) => return foundPair._2
+      case Some(foundPair) => foundPair._2
       case None => throw new NoSuchElementException
     }
   }
